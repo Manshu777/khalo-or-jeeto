@@ -482,7 +482,7 @@
       </a>
   </div>
   <script>
- async function fetchBettingStats() {
+async function fetchBettingStats() {
     try {
         const response = await fetch('/api/manshu');
         const data = await response.json();
@@ -492,27 +492,42 @@
             return;
         }
 
-        // Create a table to display the stats
+
+
+
+
+
+
+        // Create a table to display the extended stats
         let html = `
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Number</th>
+                        <th>Bet Number</th>
+                        <th>Winning Number</th>
                         <th>Total Bet Amount</th>
                         <th>Number of Bets</th>
                         <th>Unique Users</th>
+                        <th>Winning Amount </th>
+                        <th>Total Winners</th>
+                        <th>Total Winning Bets</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
 
         data.forEach(stat => {
+          console.log('start',stat)
             html += `
                 <tr>
-                    <td>${stat.number}</td>
-                    <td>${stat.total_bet_amount.toFixed(2)}</td>
-                    <td>${stat.bet_count}</td>
+                    <td>${stat.bet_number}</td>
+                    <td>${stat.winning_number}</td>
+                    <td>${parseFloat(stat.total_bet_amount).toFixed(2)}</td>
+                    <td>${stat.total_bets}</td>
                     <td>${stat.unique_users}</td>
+                    <td>${parseFloat(stat.calculated_winning_amount).toFixed(2)}</td>
+                    <td>${stat.total_winners}</td>
+                    <td>${stat.total_winning_bets}</td>
                 </tr>
             `;
         });
@@ -528,6 +543,7 @@
         document.getElementById('number-stats').innerHTML = 'Error loading data';
     }
 }
+
 
 // Call the function when the page loads
 window.onload = fetchBettingStats;

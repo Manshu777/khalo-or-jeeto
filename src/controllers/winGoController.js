@@ -217,19 +217,28 @@ const distributeCommission = async () => {
 const getHighestBet = async (req, res) => {
   try {
     const [results] = await connection.query(`
-      SELECT 
-          bet AS number,
-          SUM(money) AS total_bet_amount,
-          COUNT(*) AS bet_count,
-          COUNT(DISTINCT phone) AS unique_users
-      FROM 
-          minutes_1
-      WHERE 
-          bet IN ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-      GROUP BY 
-          bet
-      ORDER BY 
-          total_bet_amount DESC
+  SELECT 
+    bet AS bet_number,
+    result AS winning_number,
+    SUM(money) AS total_bet_amount,
+    COUNT(*) AS total_bets,
+    COUNT(DISTINCT phone) AS unique_users,
+    CASE 
+        WHEN bet = result THEN SUM(money) * 8
+        ELSE 0
+    END AS calculated_winning_amount,
+
+    COUNT(DISTINCT CASE WHEN bet = result THEN phone ELSE NULL END) AS total_winners,
+    SUM(CASE WHEN bet = result THEN 1 ELSE 0 END) AS total_winning_bets
+FROM 
+    minutes_1
+WHERE 
+    bet IN ('0','1','2','3','4','5','6','7','8','9')
+GROUP BY 
+    bet, result
+ORDER BY 
+    total_bet_amount DESC;
+
     `);
     
     if (results.length === 0) {
@@ -247,17 +256,26 @@ const getMostNumberBets = async (req, res) => {
   try {
     const [result] = await connection.query(`
       SELECT 
-          phone,
-          COUNT(*) as number_bet_count
-      FROM 
-          minutes_1
-      WHERE 
-          bet IN ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-      GROUP BY 
-          phone
-      ORDER BY 
-          number_bet_count DESC
-      LIMIT 1
+    bet AS bet_number,
+    result AS winning_number,
+    SUM(money) AS total_bet_amount,
+    COUNT(*) AS total_bets,
+    COUNT(DISTINCT phone) AS unique_users,
+    CASE 
+        WHEN bet = result THEN SUM(money) * 8
+        ELSE 0
+    END AS calculated_winning_amount,
+
+    COUNT(DISTINCT CASE WHEN bet = result THEN phone ELSE NULL END) AS total_winners,
+    SUM(CASE WHEN bet = result THEN 1 ELSE 0 END) AS total_winning_bets
+FROM 
+    minutes_1
+WHERE 
+    bet IN ('0','1','2','3','4','5','6','7','8','9')
+GROUP BY 
+    bet, result
+ORDER BY 
+    total_bet_amount DESC
     `);
     
     return res.status(200).json(result[0]);
